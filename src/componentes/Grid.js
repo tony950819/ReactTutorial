@@ -37,7 +37,7 @@ export function GridCarros(datos) {
     );
 }
 
-function ColumnaDeSeleccion(datos: PropiedadesGrid) {
+function ColumnaDeSeleccion(datos) {
     return (<Column
         locked
         field="selected"
