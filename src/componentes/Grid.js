@@ -1,51 +1,60 @@
-import * as React from 'react';
+import React,{useEffect,useState} from 'react';
 import { Grid, GridColumn as Column } from '@progress/kendo-react-grid';
+import   '@progress/kendo-theme-material/dist/all.css';
+import {ObtienePokemon} from '../Acciones/Axios'
+export function GridCarros() {
 
+    const [filtro,actualizaFiltro]=useState({filtro:undefined,cantidadReg:5,salto:0})
+    const [datos,actualizaDatos]=useState({datosGrid:[],datosCopia:[]});
+    
 
+    const alCambiarPagina = (event) => {
+        actualizaFiltro({
+            salto: event.page.skip,
+            cantidadReg:event.page.take
+        })
+    }
 
-export function GridCarros(datos) {
+    useEffect(() => {
+        
+        const obtenerPoekmons = async function () {
+            await ObtienePokemon().then((respuesta) => {
+                let resultado = respuesta.data.map(result => Object.assign({ selected: false }, result));
+                actualizaDatos({
+                    datosGrid:resultado,
+                    datosCopia:resultado
+               })
+           }).catch(error => {
+               console.log(error);
+               
+           });
+       }
+       obtenerPoekmons();
+    
+    },[]);
 
-    return (
+    return(
         <>
-            <Grid
-                detail={DetalleGrid}
-                data={datos.listaCarros.slice(datos.salto, datos.cantRegistros + datos.salto)}
+        
+        <Grid
+                data={datos.datosGrid.slice(filtro.salto,filtro.cantidadReg+filtro.salto)}
                 scrollable="scrollable"
                 selectedField="selected"
                 filterable
                 pageable={true}
-                filter={datos.filtro}
-                total={datos.listaCarros.length}
-                style={{ height: datos.altoGrid, width: datos.anchoGrid }}
-                skip={datos.salto}
-                take={datos.cantRegistros}
-                onPageChange={datos.alCambiarPagina}
-                onFilterChange={datos.alCambiarFiltro}
-                onSelectionChange={datos.alSeleccionarRegistro}
-                onHeaderSelectionChange={datos.alSeleccionarTodos}
-                onRowClick={datos.alSeleccionarRegistro}
-                expandField="expanded"
-                onExpandChange={datos.expandirDetalle}
+                filter={filtro.filtro}
+                total={datos.datosGrid.length}
+                style={{ height: "600px", width: ""}}
+                skip={filtro.salto}
+                take={filtro.cantidadReg}
+                onPageChange={alCambiarPagina}
+                
             >
-                {ColumnaDeSeleccion(datos)}
-                <Column field="placa" width={"auto"} title="Placa" filter="text" />
-                <Column field="color" width={"auto"} title="Color" filter="text" />
-                <Column field="marca" width={"auto"} title="Marca" filter="text" />
-                <Column field="descripcionMarca" width={"auto"} title="Descripción marca" filter="text" />
+
+                <Column field="name" width={"auto"} title="Nombre" filter="text" />
+                <Column field="url" width={"auto"} title="url" filter="text" />
             </Grid>
         </>
-    );
-}
-
-function ColumnaDeSeleccion(datos) {
-    return (<Column
-        locked
-        field="selected"
-        title=" "
-        width="40px"
-        key="seleccionGrid"
-        filterable={false}
-        headerSelectionValue={
-            datos.listaCarros.findIndex(dataItem => dataItem.selected === false) === -1} />
+       
     )
 }
