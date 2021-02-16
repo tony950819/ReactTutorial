@@ -2,6 +2,8 @@ import React,{useEffect,useState} from 'react';
 import { Grid, GridColumn as Column } from '@progress/kendo-react-grid';
 import   '@progress/kendo-theme-material/dist/all.css';
 import {ObtienePokemon} from '../Acciones/Axios'
+import {detalle} from '../componentes/Detalle';
+import { filterBy } from "@progress/kendo-data-query";
 export function GridCarros() {
 
     const [filtro,actualizaFiltro]=useState({filtro:undefined,cantidadReg:5,salto:0})
@@ -15,11 +17,48 @@ export function GridCarros() {
         })
     }
 
+    const expandirDetalle =(event) =>{
+        event.dataItem.expanded = !event.dataItem.expanded;
+        let indice=datos.datosGrid.findIndex(dato=>dato.id==event.dataItem.id);
+        datos.datosGrid[indice]=event.dataItem;
+
+        let indiceCopia=datos.datosCopia.findIndex(dato=>dato.id==event.dataItem.id);
+        datos.datosCopia[indiceCopia]=event.dataItem;
+
+        actualizaDatos({
+            datosGrid:datos.datosGrid,
+            datosCopia:datos.datosCopia
+        })
+        //let indice=datos.datosGrid.findIndex(dato=>dato==)
+        
+    }
+
+    
+    const alCambiarFiltro = (event) => {
+        let resultado= ObtengaDatosFiltrados(event.filter, datos.datosCopia)
+        actualizaFiltro({
+            filtro:event.filter,
+            cantidadReg:5,
+            salto:0
+        }) 
+        actualizaDatos({
+            datosGrid:resultado,
+            datosCopia:datos.datosCopia
+        })
+      
+
+
+    }
+    const ObtengaDatosFiltrados = (filtro, copiaDatos)  =>{
+        return filterBy(copiaDatos, filtro);
+    }
+
     useEffect(() => {
         
         const obtenerPoekmons = async function () {
             await ObtienePokemon().then((respuesta) => {
-                let resultado = respuesta.data.map(result => Object.assign({ selected: false }, result));
+                let resultado = respuesta.data.results.map((result,indice) => Object.assign({ selected: false,expanded:false,id:indice }, result));
+                console.log(resultado);
                 actualizaDatos({
                     datosGrid:resultado,
                     datosCopia:resultado
@@ -33,10 +72,25 @@ export function GridCarros() {
     
     },[]);
 
+
+    const ColumnaDeSeleccion = ()=> {
+        return (<Column
+            locked
+            field="selected"
+            title=" "
+            width="40px"
+            key="seleccionGrid"
+            filterable={false}
+            headerSelectionValue={
+                datos.datosGrid.findIndex(dataItem => dataItem.selected === false) === -1} />
+        )
+    }
+
     return(
         <>
         
         <Grid
+                detail={detalle}
                 data={datos.datosGrid.slice(filtro.salto,filtro.cantidadReg+filtro.salto)}
                 scrollable="scrollable"
                 selectedField="selected"
@@ -48,6 +102,9 @@ export function GridCarros() {
                 skip={filtro.salto}
                 take={filtro.cantidadReg}
                 onPageChange={alCambiarPagina}
+                expandField="expanded"
+                onExpandChange={expandirDetalle}
+                onFilterChange={alCambiarFiltro}
                 
             >
 
