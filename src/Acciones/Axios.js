@@ -1,8 +1,12 @@
 
 import axios from 'axios';
-import {pokemonApi} from '../Modelos/Constantes'
+import {pokemonApi,pokemonApiEspecifico} from '../Modelos/Constantes'
 
 export async function ObtienePokemon() {
     const resultado = axios.get(pokemonApi);
+    return resultado;
+}
+export async function ObtienePokemonEspecifico(id) {
+    const resultado = axios.get(pokemonApiEspecifico(id));
     return resultado;
 }

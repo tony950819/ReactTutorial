@@ -2,7 +2,7 @@ import React,{useEffect,useState} from 'react';
 import { Grid, GridColumn as Column } from '@progress/kendo-react-grid';
 import   '@progress/kendo-theme-material/dist/all.css';
 import {ObtienePokemon} from '../Acciones/Axios'
-import {detalle} from '../componentes/Detalle';
+import {Detalle} from '../componentes/Detalle';
 import { filterBy } from "@progress/kendo-data-query";
 export function GridCarros() {
 
@@ -29,7 +29,7 @@ export function GridCarros() {
             datosGrid:datos.datosGrid,
             datosCopia:datos.datosCopia
         })
-        //let indice=datos.datosGrid.findIndex(dato=>dato==)
+      
         
     }
 
@@ -58,7 +58,7 @@ export function GridCarros() {
         const obtenerPoekmons = async function () {
             await ObtienePokemon().then((respuesta) => {
                 let resultado = respuesta.data.results.map((result,indice) => Object.assign({ selected: false,expanded:false,id:indice }, result));
-                console.log(resultado);
+               
                 actualizaDatos({
                     datosGrid:resultado,
                     datosCopia:resultado
@@ -78,7 +78,7 @@ export function GridCarros() {
             locked
             field="selected"
             title=" "
-            width="40px"
+            width="50px"
             key="seleccionGrid"
             filterable={false}
             headerSelectionValue={
@@ -90,7 +90,7 @@ export function GridCarros() {
         <>
         
         <Grid
-                detail={detalle}
+                detail={Detalle}
                 data={datos.datosGrid.slice(filtro.salto,filtro.cantidadReg+filtro.salto)}
                 scrollable="scrollable"
                 selectedField="selected"
@@ -108,6 +108,7 @@ export function GridCarros() {
                 
             >
 
+                {ColumnaDeSeleccion()}
                 <Column field="name" width={"auto"} title="Nombre" filter="text" />
                 <Column field="url" width={"auto"} title="url" filter="text" />
             </Grid>
